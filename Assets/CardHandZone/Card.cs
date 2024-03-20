@@ -8,7 +8,7 @@ namespace GModule.Unity.CardHandZone
     public class Card : MonoBehaviour, IDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
         public event Action<Card> PointerEnterEvent;
-        public event Action<Card> PointerDownEvent;
+        public event Action<Card, PointerEventData> PointerDownEvent;
         public event Action<Card, PointerEventData> DragEvent;
         public event Action<Card> PointerUpEvent;
         public event Action<Card> PointerExitEvent;
@@ -37,7 +37,7 @@ namespace GModule.Unity.CardHandZone
 
         public virtual void OnPointerDown(PointerEventData eventData)
         {
-            PointerDownEvent?.Invoke(this);
+            PointerDownEvent?.Invoke(this, eventData);
         }
 
         public virtual void OnPointerUp(PointerEventData eventData)

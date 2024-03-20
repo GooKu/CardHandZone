@@ -10,6 +10,7 @@ namespace GModule.Unity.CardHandZone
     [RequireComponent(typeof(RectTransform))]
     public class HandZone : MonoBehaviour
     {
+        public event Action<Card, PointerEventData> CardSelectEvent;
         public event Action<Card> PlayCardEvent;
         public event Action<Card> CardReleaseEvent;
         public event Action<Card, PointerEventData> CardDragEvent;
@@ -19,7 +20,7 @@ namespace GModule.Unity.CardHandZone
 
         [SerializeField] protected RectTransform playZone;
         [SerializeField] protected RectTransform invalidZone;
-        [SerializeField] protected CanvasScaler scaler;
+        [SerializeField] protected Canvas canvas;
         [SerializeField] protected float defaultCardSpace = 16;
         [SerializeField] protected bool insertFromLeft = true;
         [SerializeField] protected float moveSpeed = 100;
@@ -214,11 +215,12 @@ namespace GModule.Unity.CardHandZone
             HoldCard(card);
         }
 
-        protected virtual void onPointerDownCard(Card card)
+        protected virtual void onPointerDownCard(Card card, PointerEventData eventData)
         {
             if(selectCard != null) { return; }
 
             selectCard = card;
+            CardSelectEvent?.Invoke(card, eventData);
         }
 
         protected virtual void onPointerUpCard(Card card)
@@ -228,7 +230,7 @@ namespace GModule.Unity.CardHandZone
             selectCard = null;
             IsCardInPlayArea = false;
 
-            if (RectTransformUtility.RectangleContainsScreenPoint(playZone, Input.mousePosition))
+            if (RectTransformUtility.RectangleContainsScreenPoint(playZone, Input.mousePosition, canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : Camera.main))
             {
                 PlayCardEvent?.Invoke(card);
                 return;
@@ -249,7 +251,7 @@ namespace GModule.Unity.CardHandZone
 
             card.RectTransform.anchoredPosition += eventData.delta / GetComponentInParent<Canvas>().scaleFactor;
 
-            triggerCardDrag(card, eventData);
+            TriggerCardDrag(card, eventData);
 
             bool inPlayable = RectTransformUtility.RectangleContainsScreenPoint(playZone, Input.mousePosition);
 
@@ -257,7 +259,7 @@ namespace GModule.Unity.CardHandZone
             {
                 IsCardInPlayArea = inPlayable;
 
-                triggerCardInOutPlayableArea(card, inPlayable);
+                TriggerCardInOutPlayableArea(card, inPlayable);
             }
 
             if (invalidZone != null 
@@ -267,12 +269,12 @@ namespace GModule.Unity.CardHandZone
             }
         }
 
-        protected void triggerCardDrag(Card card, PointerEventData eventData)
+        protected void TriggerCardDrag(Card card, PointerEventData eventData)
         {
             CardDragEvent?.Invoke(card, eventData);
         }
 
-        protected void triggerCardInOutPlayableArea(Card card, bool isIn)
+        protected void TriggerCardInOutPlayableArea(Card card, bool isIn)
         {
             CardInOutPlayableAreaEvent?.Invoke(card, isIn);
         }

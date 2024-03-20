@@ -1141,6 +1141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playZone: {fileID: 158422631}
   invalidZone: {fileID: 509225305}
+  canvas: {fileID: 567959030}
   scaler: {fileID: 567959029}
   defaultCardSpace: 8
   insertFromLeft: 1
