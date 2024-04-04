@@ -110,18 +110,19 @@ namespace GModule.Unity.CardHandZone
             cardTrans.DOAnchorPos(pos, animTime);
         }
 
-        public virtual void MoveOutCard(Card card, Vector3 outPosition, float endScale = 1)
+        public virtual float MoveOutCard(Card card, Vector3 outPosition, float endScale = 1)
         {
             var cardIndex = cards.IndexOf(card);
-            if (cardIndex == -1) { return; }
+            if (cardIndex == -1) { return 0; }
 
             var cardTrans = card.RectTransform;
             var dis = Vector2.Distance(outPosition, cardTrans.position);
             var animTime = dis / moveSpeed;
-            cardTrans.DOMove(outPosition, animTime).OnComplete(() => { CardMoveOutFinishEvent?.Invoke(card); });
+            cardTrans.transform.DOMove(outPosition, animTime).OnComplete(() => { CardMoveOutFinishEvent?.Invoke(card); });
             card.RectTransform.DOScale(Vector3.one * endScale, animTime / 2);
 
             RemoveCard(card);
+            return animTime;
         }
 
         public virtual void RemoveCard(Card card)
@@ -138,6 +139,11 @@ namespace GModule.Unity.CardHandZone
             cards.RemoveAt(cardIndex);
             cardHandPos.RemoveAt(cardIndex);
 
+            RearrangeHand();
+        }
+
+        public void RearrangeHand()
+        {
             cardHandPos = calculateCardSpacing();
             for (int i = 0; i < cardHandPos.Count; i++)
             {
